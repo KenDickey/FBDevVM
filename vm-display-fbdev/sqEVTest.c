@@ -18,8 +18,7 @@
  * and their events. Its primary purpose is for kernel or X driver
  * debugging.
  *
- * See INSTALL for installation details or manually compile with
- * gcc -o evtest sqEVTest.c
+ *  gcc -o evtest sqEVTest.c
  */
 
 /*
@@ -1217,8 +1216,7 @@ static int print_events(int fd)
 				/*@@KenD@@*/
 				updateMousePosition(ev[i]);
 				updateMouseButtons(ev[i]);
-				setKeyCode(ev[i]);
-				updateModifierState(ev[i]);
+				setKeyCode(ev[i]); /* invokes updateModifierState() */
 			}
 		}
 
@@ -1546,7 +1544,7 @@ void updateMousePosition(struct input_event* evt) {
 	break;
       case REL_WHEEL:
 	wheelDelta += evt->value;
-/*	printf( "Wheel VALUE: %d; DELTA: %d ", mouseWheelDelta(), evt->value ) ; */
+	printf( "*** Wheel VALUE: %d; DELTA: %d ", mouseWheelDelta(), evt->value ) ;
 	break;
       default:
 	break;
@@ -1556,7 +1554,7 @@ void updateMousePosition(struct input_event* evt) {
 
 void printMouseState() {
    if ( (mousePosition.x != 0) || (mousePosition.y != 0) ) {
-     printf( "Mouse at %4d,%4d ", mousePosition.x, mousePosition.y );
+     printf( "*** Mouse at %4d,%4d ", mousePosition.x, mousePosition.y );
      printButtons( mouseButtons() );
      printModifiers( modifierState() );
      if (mouseWheelDelta() != 0) {
@@ -1644,14 +1642,15 @@ void setKeyCode(struct input_event* evt) {
     lastKeyCode = evt->code;
     switch (evt->value) {
       case 1: /* keydown */
+	printKeyState(1);
 	keyRepeated = 0;
 	break;
       case 2: /* repeat */
+	printKeyState(2);
 	keyRepeated = 1;
 	break;
       default: /* 0 => keyUp */
-	printKeyState();
-	/*@@FIXME:@@@ register Key Event @@@@@*/
+	printKeyState(0);
 	clearKeyCode();
 	break;
     }
@@ -1660,11 +1659,24 @@ void setKeyCode(struct input_event* evt) {
   }
 }
 
-void printKeyState() {
+void printKeyState(int kind) {
   if (keyCode() != 0) {
-    printf("Key: ");
+    printf("*** Key: ");
     printKey( keyCode() ) ;
-    printButtons( buttonState() );
+    switch (kind) {
+	case 1: printf(" DOWN   "); 
+		printButtons(   buttonState() );
+		printModifiers( modifierState() );
+		printf("\n*** Key: ");
+   		printKey( keyCode() ) ;
+	/* send both DOWN and KEY events */
+		printf(" KEY    ");
+		break;
+	case 0: printf(" UP     "); break;
+        case 2: printf(" REPEAT "); break;
+	default: break;
+    }
+    printButtons(   buttonState() );
     printModifiers( modifierState() );
     if (repeated()) {
       printf(" key repeated\n " );
@@ -1690,10 +1702,21 @@ void clearModifierState() {
   rightAdjuncts = 0;
 }
 
+void printModifierKey(struct input_event* evt) {
+  printf( "*** %s ", codename(evt->type, evt->code) );
+  switch (evt->value) {
+	case 1: printf("DOWN\n"); break;
+	case 2: printf("REPEAT\n"); break;
+	case 0: printf("UP\n"); break;
+	default: break;
+  }
+}
+
 void updateModifierState(struct input_event* evt)
 {  /* harmless if not modifier key */
   if (evt->type == EV_KEY) {
     if (evt->value == 1) { /* button down */
+      printModifierKey(evt);
       switch (evt->code) {
 	case KEY_LEFTMETA:   leftAdjuncts  |= CommandKeyBit; break;
 	case KEY_LEFTALT:    leftAdjuncts  |= OptionKeyBit;  break;
@@ -1706,6 +1729,7 @@ void updateModifierState(struct input_event* evt)
 	default: break;
 	}
      } else if (evt->value == 0) { /* button up */
+       printModifierKey(evt);
        switch (evt->code) {
 	case KEY_LEFTMETA:   leftAdjuncts  &= ~CommandKeyBit; break;
 	case KEY_LEFTALT:    leftAdjuncts  &= ~OptionKeyBit;  break;
