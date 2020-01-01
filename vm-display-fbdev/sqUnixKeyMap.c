@@ -45,6 +45,8 @@ static int baseKey[KMAPSIZE], shiftKey[KMAPSIZE];
 
 void initKeyMaps() {
 int i;
+	
+  if (keyMapInitialized) return; /* do this once */
  
   for (i = 0; i < KMAPSIZE; i++) ( 
 	baseKey[i]  = i;  /* default for debug @@?? use 0x00 ??@@ */
@@ -194,36 +196,40 @@ int i;
     shiftKey[KEY_F9]     = XK_F9;
     baseKey[KEY_F10]     = XK_F10;
     shiftKey[KEY_F10]    = XK_F10;
+  /* NB: NumLock swaps to/from 4/left, 1/end, etc.
+   *  NumLock OFF => Left, End, ..  [UNshifted]
+   *  NumLock ON  =>    4,   1, ..  [  SHIFTED]
+   */
     baseKey[KEY_NUMLOCK]     = XK_Num_Lock;
     shiftKey[KEY_NUMLOCK]    = XK_Num_Lock;
     baseKey[KEY_SCROLLLOCK]  = XK_Scroll_Lock;
     shiftKey[KEY_SCROLLLOCK] = XK_Scroll_Lock;
-    baseKey[KEY_KP7]      = XK_KP_7;
-    shiftKey[KEY_KP7]     = XK_KP_Home;
-    baseKey[KEY_KP8]      = XK_KP_8;
-    shiftKey[KEY_KP8]     = XK_KP_Up;
-    baseKey[KEY_KP9]      = XK_KP_9;
-    shiftKey[KEY_KP9]     = XK_KP_Page_Up;
+    baseKey[KEY_KP7]      = XK_KP_Home;
+    shiftKey[KEY_KP7]     = XK_KP_7;
+    baseKey[KEY_KP8]      = XK_KP_Up;
+    shiftKey[KEY_KP8]     = XK_KP_8;
+    baseKey[KEY_KP9]      = XK_KP_Page_Up;
+    shiftKey[KEY_KP9]     = XK_KP_9;
     baseKey[KEY_KPMINUS]  = XK_KP_Subtract;
     shiftKey[KEY_KPMINUS] = XK_KP_Subtract;
-    baseKey[KEY_KP4]      = XK_KP_4;
-    shiftKey[KEY_KP4]     = XK_KP_Left;
-    baseKey[KEY_KP5]      = XK_KP_5;
+    baseKey[KEY_KP4]      = XK_KP_Left;
+    shiftKey[KEY_KP4]     = XK_KP_4;
+    baseKey[KEY_KP5]      = XK_KP_Begin; /* 0xFFB5 */
     shiftKey[KEY_KP5]     = XK_KP_5;
-    baseKey[KEY_KP6]      = XK_KP_6;
-    shiftKey[KEY_KP6]     = XK_KP_Right;
+    baseKey[KEY_KP6]      = XK_KP_Right;
+    shiftKey[KEY_KP6]     = XK_KP_6;
     baseKey[KEY_KPPLUS]   = XK_KP_Add;
     shiftKey[KEY_KPPLUS]  = XK_KP_Add;
-    baseKey[KEY_KP1]      = XK_KP_1;
-    shiftKey[KEY_KP1]     = XK_KP_End;
-    baseKey[KEY_KP2]      = XK_KP_2;
-    shiftKey[KEY_KP2]     = XK_KP_Down;
-    baseKey[KEY_KP3]      = XK_KP_3;
-    shiftKey[KEY_KP3]     = XK_KP_Page_Down;
-    baseKey[KEY_KP0]      = XK_KP_0;
-    shiftKey[KEY_KP0]     = XK_KP_Insert;
-    baseKey[KEY_KPDOT]    = XK_KP_Decimal;
-    shiftKey[KEY_KPDOT]   = XK_KP_Delete;
+    baseKey[KEY_KP1]      = XK_KP_End;
+    shiftKey[KEY_KP1]     = XK_KP_1;
+    baseKey[KEY_KP2]      = XK_KP_Down;
+    shiftKey[KEY_KP2]     = XK_KP_2;
+    baseKey[KEY_KP3]      = XK_KP_Page_Down;
+    shiftKey[KEY_KP3]     = XK_KP_3;
+    baseKey[KEY_KP0]      = XK_KP_Insert;
+    shiftKey[KEY_KP0]     = XK_KP_0;
+    baseKey[KEY_KPDOT]    = XK_KP_Decimal; /* ?Delete? */
+    shiftKey[KEY_KPDOT]   = XK_KP_Decimal;
 
 /*******************
     baseKey[KEY_ZENKAKUHANKAKU]  = 0x;
@@ -254,7 +260,11 @@ int i;
     shiftKey[KEY_KPJPCOMMA] = 0x;
 *******************/
 
-    baseKey[KEY_KPENTER]    = XK_KP_Enter; /* @@??@@ CR @@??@@ */
+/*
+ * Note: ASCII for KeyPad Chars; add 0xFF80 for keysym defs 
+ *  CR (Enter) = 0x08 --> 0xFF88 = XK_KP_Enter
+ */
+    baseKey[KEY_KPENTER]    = XK_KP_Enter; 
     shiftKey[KEY_KPENTER]   = XK_KP_Enter;
     baseKey[KEY_RIGHTCTRL]  = XK_Control_R; 
     shiftKey[KEY_RIGHTCTRL] = XK_Control_R;
@@ -264,7 +274,7 @@ int i;
     shiftKey[KEY_SYSRQ]    = XK_Sys_Req;
     baseKey[KEY_RIGHTALT]  = XK_Alt_R;
     shiftKey[KEY_RIGHTALT] = XK_Alt_R;
-    baseKey[KEY_LINEFEED]  = 0x0A; /* LF: LineFeed; ^J */
+    baseKey[KEY_LINEFEED]  = 0x0A; /* LF: LineFeed; ^J; NB: XK_Linefeed = 0xFF0A */ 
     shiftKey[KEY_LINEFEED] = 0x0A;
     baseKey[KEY_HOME]    = XK_Home;
     shiftKey[KEY_HOME]   = XK_Home;
@@ -567,5 +577,10 @@ int i;
     baseKey[KEY_MICMUTE]  = 0x;
     shiftKey[KEY_MICMUTE] = 0x;
 **************/
-
+    keyMapInitialized = 1; /* C thinks this means TRUE */
 }
+
+
+
+
+/*			--- E O F --- 			*/
