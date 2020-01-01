@@ -48,7 +48,7 @@ int i;
     baseKey[KEY_BACKSPACE]  = 0x08;
     shiftKey[KEY_BACKSPACE] = 0x08;
     baseKey[KEY_TAB]    = 0x09; /* HT: Horizontal Tab */
-    shiftKey[KEY_TAB]   = 0x09;
+    shiftKey[KEY_TAB]   = 0x09; /* @@?XK_ISO_Left_Tab?@@ */
     baseKey[KEY_Q]      = 0x71; /* 'q' */
     shiftKey[KEY_Q]     = 0x51; /* 'Q' */
     baseKey[KEY_W]      = 0x77; /* 'w' */
@@ -73,10 +73,10 @@ int i;
     shiftKey[KEY_LEFTBRACE]  = 0x7B; /* '{' */
     baseKey[KEY_RIGHTBRACE]  = 0x5D; /* ']' */
     shiftKey[KEY_RIGHTBRACE] = 0x7D; /* '}' */
-    baseKey[KEY_ENTER]      = 0x0D; /* CR: Carriage Return */
-    shiftKey[KEY_ENTER]     = 0x0D;
-    baseKey[KEY_LEFTCTRL]   = XK_Control_L;
-    shiftKey[KEY_LEFTCTRL]  = XK_Control_L;
+    baseKey[KEY_ENTER]       = 0x0D; /* CR: Carriage Return */
+    shiftKey[KEY_ENTER]      = 0x0D;
+    baseKey[KEY_LEFTCTRL]    = XK_Control_L;
+    shiftKey[KEY_LEFTCTRL]   = XK_Control_L;
     baseKey[KEY_A]      = 0x61; /* 'a' */
     shiftKey[KEY_A]     = 0x41; /* 'A' */
     baseKey[KEY_S]      = 0x73; /* 's' */
@@ -99,12 +99,12 @@ int i;
     shiftKey[KEY_SEMICOLON]  = 0x3A; /* ':' */
     baseKey[KEY_APOSTROPHE]  = 0x27; /* ''' */
     shiftKey[KEY_APOSTROPHE] = 0x22; /* '"' */
-    baseKey[KEY_GRAVE]      = 0x60; /* '`' */
-    shiftKey[KEY_GRAVE]     = 0x7E; /* '~' */
-    baseKey[KEY_LEFTSHIFT]  = XK_Shift_L;
-    shiftKey[KEY_LEFTSHIFT] = XK_Shift_L;
-    baseKey[KEY_BACKSLASH]  = 0x5C; /* '\' */
-    shiftKey[KEY_BACKSLASH] = 0x7C; /* '|' */
+    baseKey[KEY_GRAVE]       = 0x60; /* '`' */
+    shiftKey[KEY_GRAVE]      = 0x7E; /* '~' */
+    baseKey[KEY_LEFTSHIFT]   = XK_Shift_L;
+    shiftKey[KEY_LEFTSHIFT]  = XK_Shift_L;
+    baseKey[KEY_BACKSLASH]   = 0x5C; /* '\' */
+    shiftKey[KEY_BACKSLASH]  = 0x7C; /* '|' */
     baseKey[KEY_Z]      = 0x7A; /* 'z' */
     shiftKey[KEY_Z]     = 0x5A; /* 'Z' */
     baseKey[KEY_X]      = 0x78; /* 'x' */
@@ -131,10 +131,10 @@ int i;
     shiftKey[KEY_KPASTERISK] = XK_asterisk;
     baseKey[KEY_LEFTALT]    = XK_Alt_L;
     shiftKey[KEY_LEFTALT]   = XK_Alt_L;
-    baseKey[KEY_SPACE]   = 0x20; /* ' ' */
-    shiftKey[KEY_SPACE]  = 0x20;
-    baseKey[KEY_CAPSLOCK]  = XK_Caps_Lock;
-    shiftKey[KEY_CAPSLOCK] = XK_Caps_Lock;
+    baseKey[KEY_SPACE]      = 0x20; /* ' ' */
+    shiftKey[KEY_SPACE]     = 0x20;
+    baseKey[KEY_CAPSLOCK]   = XK_Caps_Lock;
+    shiftKey[KEY_CAPSLOCK]  = XK_Caps_Lock;
     baseKey[KEY_F1]      = XK_F1;
     shiftKey[KEY_F1]     = XK_F1;
     baseKey[KEY_F2]      = XK_F2;
@@ -279,13 +279,13 @@ int i;
     shiftKey[KEY_YEN] = 0x;
 *******************/
 
-    baseKey[KEY_LEFTMETA]  = 0x;
-    shiftKey[KEY_LEFTMETA] = 0x;
-    baseKey[KEY_RIGHTMETA]  = 0x;
-    shiftKey[KEY_RIGHTMETA] = 0x;
+    baseKey[KEY_LEFTMETA]   = XK_Meta_L;
+    shiftKey[KEY_LEFTMETA]  = XK_Meta_L;
+    baseKey[KEY_RIGHTMETA]  = XK_Meta_R;
+    shiftKey[KEY_RIGHTMETA] = XK_Meta_R;
 
 /*******************
-    baseKey[KEY_COMPOSE]  = 0x;
+    baseKey[KEY_COMPOSE]  = 0x; /* @@??What does this key do??@@ ??XK_Multi_key?? */u
     shiftKey[KEY_COMPOSE] = 0x;
     baseKey[KEY_STOP]  = 0x;
     shiftKey[KEY_STOP] = 0x;
