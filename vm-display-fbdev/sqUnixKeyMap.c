@@ -31,7 +31,10 @@
  */
 
 /* input.h defines libevdev key codes which get 
- *  mapped to keysum (X11) codes or ASCII 
+ *  mapped to keysum (X11) codes or ASCII.
+ *
+ * Based on emperical testing w logitech USB keyboard & mouse 
+ * on Raspberry Pi 3B running Alpine Linux.
  */
 
 #include <input.h>   /* /usr/include/linux/input.h */
@@ -199,37 +202,40 @@ int i;
   /* NB: NumLock swaps to/from 4/left, 1/end, etc.
    *  NumLock OFF => Left, End, ..  [UNshifted]
    *  NumLock ON  =>    4,   1, ..  [  SHIFTED]
+   *
+   * Note: VM seems to not know, e.g., XK_KP_Page_Up
+   *       so need to use XK_Page_Up here.
    */
     baseKey[KEY_NUMLOCK]     = XK_Num_Lock;
     shiftKey[KEY_NUMLOCK]    = XK_Num_Lock;
     baseKey[KEY_SCROLLLOCK]  = XK_Scroll_Lock;
     shiftKey[KEY_SCROLLLOCK] = XK_Scroll_Lock;
-    baseKey[KEY_KP7]      = XK_KP_Home;
-    shiftKey[KEY_KP7]     = XK_KP_7;
-    baseKey[KEY_KP8]      = XK_KP_Up;
-    shiftKey[KEY_KP8]     = XK_KP_8;
-    baseKey[KEY_KP9]      = XK_KP_Page_Up;
-    shiftKey[KEY_KP9]     = XK_KP_9;
-    baseKey[KEY_KPMINUS]  = XK_KP_Subtract;
-    shiftKey[KEY_KPMINUS] = XK_KP_Subtract;
-    baseKey[KEY_KP4]      = XK_KP_Left;
-    shiftKey[KEY_KP4]     = XK_KP_4;
-    baseKey[KEY_KP5]      = XK_KP_Begin; /* 0xFFB5 */
-    shiftKey[KEY_KP5]     = XK_KP_5;
-    baseKey[KEY_KP6]      = XK_KP_Right;
-    shiftKey[KEY_KP6]     = XK_KP_6;
-    baseKey[KEY_KPPLUS]   = XK_KP_Add;
-    shiftKey[KEY_KPPLUS]  = XK_KP_Add;
-    baseKey[KEY_KP1]      = XK_KP_End;
-    shiftKey[KEY_KP1]     = XK_KP_1;
-    baseKey[KEY_KP2]      = XK_KP_Down;
-    shiftKey[KEY_KP2]     = XK_KP_2;
-    baseKey[KEY_KP3]      = XK_KP_Page_Down;
-    shiftKey[KEY_KP3]     = XK_KP_3;
-    baseKey[KEY_KP0]      = XK_KP_Insert;
-    shiftKey[KEY_KP0]     = XK_KP_0;
-    baseKey[KEY_KPDOT]    = XK_KP_Decimal; /* ?Delete? */
-    shiftKey[KEY_KPDOT]   = XK_KP_Decimal;
+    baseKey[KEY_KP7]      = XK_Home;
+    shiftKey[KEY_KP7]     = XK_7; /* XK_KP_7 .. */
+    baseKey[KEY_KP8]      = XK_Up;
+    shiftKey[KEY_KP8]     = XK_8;
+    baseKey[KEY_KP9]      = XK_Page_Up;
+    shiftKey[KEY_KP9]     = XK_9;
+    baseKey[KEY_KPMINUS]  = XK_minus;
+    shiftKey[KEY_KPMINUS] = XK_minus;
+    baseKey[KEY_KP4]      = XK_Left;
+    shiftKey[KEY_KP4]     = XK_4;
+    baseKey[KEY_KP5]      = XK_Begin; /* 0xFFB5 */
+    shiftKey[KEY_KP5]     = XK_5;
+    baseKey[KEY_KP6]      = XK_Right;
+    shiftKey[KEY_KP6]     = XK_6;
+    baseKey[KEY_KPPLUS]   = XK_plus;
+    shiftKey[KEY_KPPLUS]  = XK_plus;
+    baseKey[KEY_KP1]      = XK_End;
+    shiftKey[KEY_KP1]     = XK_1;
+    baseKey[KEY_KP2]      = XK_Down;
+    shiftKey[KEY_KP2]     = XK_2;
+    baseKey[KEY_KP3]      = XK_Page_Down;
+    shiftKey[KEY_KP3]     = XK_3;
+    baseKey[KEY_KP0]      = XK_Insert;
+    shiftKey[KEY_KP0]     = XK_0;
+    baseKey[KEY_KPDOT]    = XK_period; 
+    shiftKey[KEY_KPDOT]   = XK_period;
 
 /*******************
     baseKey[KEY_ZENKAKUHANKAKU]  = 0x;
@@ -264,12 +270,12 @@ int i;
  * Note: ASCII for KeyPad Chars; add 0xFF80 for keysym defs 
  *  CR (Enter) = 0x08 --> 0xFF88 = XK_KP_Enter
  */
-    baseKey[KEY_KPENTER]    = XK_KP_Enter; 
-    shiftKey[KEY_KPENTER]   = XK_KP_Enter;
+    baseKey[KEY_KPENTER]    = 0x0D; /* ?XK_Return?  ?XK_KP_Enter? */
+    shiftKey[KEY_KPENTER]   = 0x0D; /* CR */
     baseKey[KEY_RIGHTCTRL]  = XK_Control_R; 
     shiftKey[KEY_RIGHTCTRL] = XK_Control_R;
-    baseKey[KEY_KPSLASH]    = XK_KP_Divide;
-    shiftKey[KEY_KPSLASH]   = XK_KP_Divide;
+    baseKey[KEY_KPSLASH]    = XK_slash;  /* XK_KP_Divide */
+    shiftKey[KEY_KPSLASH]   = XK_slash;
     baseKey[KEY_SYSRQ]     = XK_Sys_Req; /* Print Screen */
     shiftKey[KEY_SYSRQ]    = XK_Sys_Req;
     baseKey[KEY_RIGHTALT]  = XK_Alt_R;
@@ -308,8 +314,10 @@ int i;
     shiftKey[KEY_VOLUMEUP] = 0x;
     baseKey[KEY_POWER]  = 0x;
     shiftKey[KEY_POWER] = 0x;
-    baseKey[KEY_KPEQUAL]  = 0x;
-    shiftKey[KEY_KPEQUAL] = 0x;
+/*******************
+    baseKey[KEY_KPEQUAL]  = 0x3D; /* '=' */
+    shiftKey[KEY_KPEQUAL] = 0x3D;
+*******************/
     baseKey[KEY_KPPLUSMINUS]  = 0x;
     shiftKey[KEY_KPPLUSMINUS] = 0x;
     baseKey[KEY_PAUSE]  = 0x;
@@ -328,14 +336,12 @@ int i;
     shiftKey[KEY_YEN] = 0x;
 *******************/
 
-    baseKey[KEY_LEFTMETA]   = XK_Meta_L;
-    shiftKey[KEY_LEFTMETA]  = XK_Meta_L;
-    baseKey[KEY_RIGHTMETA]  = XK_Meta_R;
-    shiftKey[KEY_RIGHTMETA] = XK_Meta_R;
+    baseKey[KEY_LEFTMETA]  = XK_Super_L; /* NB: NOT XK_Meta_L ! */
+    shiftKey[KEY_LEFTMETA] = XK_Super_L;
+    baseKey[KEY_COMPOSE]   = XK_Menu;
+    shiftKey[KEY_COMPOSE]  = XK_Menu;
 
 /*******************
-    baseKey[KEY_COMPOSE]  = 0x; /* @@??What does this key do??@@ ??XK_Multi_key?? */u
-    shiftKey[KEY_COMPOSE] = 0x;
     baseKey[KEY_STOP]  = 0x;
     shiftKey[KEY_STOP] = 0x;
     baseKey[KEY_AGAIN]  = 0x;
