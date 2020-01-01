@@ -4,7 +4,7 @@
  *
  * Author: Ken.Dickey@whidbey.com
  *
- * Copyright (C) 2019,2020 by Kenneth A Dickey
+ * Copyright (C) 2019,2020 by Kenneth Alan Dickey
  * All Rights Reserved.
  * 
  * [Donated to the Squeak/Cuis/Pharo Community]
@@ -30,6 +30,10 @@
  *   DEALINGS IN THE SOFTWARE.
  */
 
+/* input.h defines libevdev key codes which get 
+ *  mapped to keysum (X11) codes or ASCII 
+ */
+
 #include <input.h>   /* /usr/include/linux/input.h */
 #include <keysym.h>  /* /usr/include/X11/keysym.h */
 
@@ -42,15 +46,19 @@ static int baseKey[KMAPSIZE], shiftKey[KMAPSIZE];
 void initKeyMaps() {
 int i;
  
-  for (i = 0; i < KMAPSIZE; i++) (
-	baseKey[i]  = i;
+  for (i = 0; i < KMAPSIZE; i++) ( 
+	baseKey[i]  = i;  /* default for debug @@?? use 0x00 ??@@ */
 	shiftKey[i] = i;
   }
    /* Note: add 0x40 to keys less than 0x30 to get ctrl letter
-      e.g. FF = 0x0C; so 0x4C = L => '^L' for Form Feed  */ 
+    * e.g. FF = 0x0C; so 0x4C = L => '^L' (Ctrl-L) for Form Feed
+    *
+    * Note: ASCII for Control Chars; add 0xFF00 for keysym defs
+    * e.g. 0x08 [BS] + 0xFF00 -> 0xFF08 = XK_BackSpace
+    */ 
     baseKey[KEY_RESERVED]  = 0x00; /* NUL = ^@ */
     shiftKey[KEY_RESERVED] = 0x00;
-    baseKey[KEY_ESC]    = 0x1B;  /* BS: BackSpace */
+    baseKey[KEY_ESC]    = 0x1B; /* ESC: ESCape */
     shiftKey[KEY_ESC]   = 0x1B;
     baseKey[KEY_1]      = 0x31; /* '1' */
     shiftKey[KEY_1]     = 0x21; /* '!' */
@@ -76,7 +84,7 @@ int i;
     shiftKey[KEY_MINUS] = 0x5F; /* '_' */
     baseKey[KEY_EQUAL]  = 0x3D; /* '=' */
     shiftKey[KEY_EQUAL] = 0x2B; /* '+' */
-    baseKey[KEY_BACKSPACE]  = 0x08;
+    baseKey[KEY_BACKSPACE]  = 0x08; /* BS: BackSpace */
     shiftKey[KEY_BACKSPACE] = 0x08;
     baseKey[KEY_TAB]    = 0x09; /* HT: Horizontal Tab */
     shiftKey[KEY_TAB]   = 0x09; /* @@?XK_ISO_Left_Tab?@@ */
