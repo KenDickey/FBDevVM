@@ -15,7 +15,7 @@ You need some defines (e.g. setup for Alpine Linux; also 'export MUSL=1')
  export SQUEAK_FBDEV=/dev/fb0
  export SQUEAK_KBDEV=/dev/input/event0
  export SQUEAK_MSDEV=/dev/input/event1
- export EVDEV=1
+ export SQUEAK_LIBEVDEV=1
 
 Test system is currently a Raspberry Pi 3B running Alpine Linux.
 

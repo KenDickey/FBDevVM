@@ -4,6 +4,10 @@
  * Last Updated: December 2019
  */
 
+#ifndef SQUEAK_LIBEVDEV
+#define SQUEAK_LIBEVDEV
+
+#define _GNU_SOURCE /* for MUSL */
 
 #include "sq.h"
 #include <linux/input.h>
@@ -62,6 +66,5 @@
 #define MidMouseButtonBit   YellowButtonBit
 #define RightMouseButtonBit BlueButtonBit
 
-#define _GNU_SOURCE /* for MUSL */
-
+#endif
 

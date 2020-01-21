@@ -128,14 +128,16 @@ static struct kb *kb= 0;
 static struct fb *fb= 0;
 
 #include "sqUnixFBDevUtil.c"
+
 #ifdef SQUEAK_LIBEVDEV
-#include "sqUnixFBDevEVDEV.h"
-#include "sqUnixFBDevMouseEVDEV.c"
-#include "sqUnixFBDevKeyboardEVDEV.c"
+#include "sqUnixFBDevLibEVDEV.h"
+#include "sqUnixKeyMap.c"
+#include "sqUnixFBDevLibEVDEV.c"
 #else
 #include "sqUnixFBDevMouse.c"
 #include "sqUnixFBDevKeyboard.c"
 #endif
+
 #include "sqUnixFBDevFramebuffer.c"
 
 
