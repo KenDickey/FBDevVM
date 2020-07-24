@@ -52,9 +52,9 @@
 
 #include "sq.h"
 /* wiki.squeak.org/squeak/897 shows:
-   red    #b100 left  (4)
-   yellow #b010 mid   (2)
-   blue   #b001 right (1)
+   red    #b100 left  (4)	button1
+   yellow #b010 mid   (2)	button2
+   blue   #b001 right (1)	button3
  So binary view of bit matches mouse (l|m|r) position
  */
 #define LeftMouseButtonBit  RedButtonBit
@@ -150,7 +150,7 @@ static const struct query_mode {
 	{ "EV_KEY", EV_KEY, KEY_MAX, EVIOCGKEY(KEY_MAX) },
 	{ "EV_LED", EV_LED, LED_MAX, EVIOCGLED(LED_MAX) },
 	{ "EV_SND", EV_SND, SND_MAX, EVIOCGSND(SND_MAX) },
-	{ "EV_SW",  EV_SW, SW_MAX, EVIOCGSW(SW_MAX) },
+	{ "EV_SW",  EV_SW,  SW_MAX,  EVIOCGSW(SW_MAX) },
 };
 
 static int grab_flag = 0;
@@ -237,11 +237,11 @@ static const int maxval[EV_MAX + 1] = {
 	[EV_REL] = REL_MAX,
 	[EV_ABS] = ABS_MAX,
 	[EV_MSC] = MSC_MAX,
-	[EV_SW] = SW_MAX,
+	[EV_SW]  = SW_MAX,
 	[EV_LED] = LED_MAX,
 	[EV_SND] = SND_MAX,
 	[EV_REP] = REP_MAX,
-	[EV_FF] = FF_MAX,
+	[EV_FF]  = FF_MAX,
 	[EV_FF_STATUS] = FF_STATUS_MAX,
 };
 
@@ -1190,22 +1190,33 @@ static int print_events(int fd)
 			type = ev[i].type;
 			code = ev[i].code;
 
-			printf("Event: time %ld.%06ld, ", ev[i].input_event_sec, ev[i].input_event_usec);
+			if (ev[i].value == 2) /* 2 -> REPEAT */ {
+				updateMousePosition(ev[i]);
+				updateMouseButtons(ev[i]);
+				setKeyCode(ev[i]); /* invokes updateModifierState() */
+			} else {
 
-			if (type == EV_SYN) {
+
+			  if ( (type == EV_SYN) | (type == EV_MSC) ) {
+			      /*@@
 				if (code == SYN_MT_REPORT)
 					printf("++++++++++++++ %s ++++++++++++\n", codename(type, code));
 				else if (code == SYN_DROPPED)
 					printf(">>>>>>>>>>>>>> %s <<<<<<<<<<<<\n", codename(type, code));
 				else
 					printf("-------------- %s ------------\n", codename(type, code));
+				@@*/
 				/*@@KenD@@*/
 				printMouseState();
 				clearMouseWheel();
 				/*printKeyState();*/
 				/*clearKeyCode();*/
 				/* NB: does NOT clear modifierState */
-			} else {
+
+			    } else {
+
+			      	printf("Event: time %ld.%06ld, ", ev[i].input_event_sec, ev[i].input_event_usec);
+
 				printf("type %d (%s), code %d (%s), ",
 					type, typename(type),
 					code, codename(type, code));
@@ -1217,6 +1228,7 @@ static int print_events(int fd)
 				updateMousePosition(ev[i]);
 				updateMouseButtons(ev[i]);
 				setKeyCode(ev[i]); /* invokes updateModifierState() */
+			    }
 			}
 		}
 
@@ -1607,7 +1619,7 @@ void updateMouseButtons(struct input_event* evt) {
 /*==================*/
 
 static int  lastKeyCode = 0;
-static int  keyRepeated = FALSE;
+static int  keyRepeated = 0; /*FALSE;*/
 
 int keyCode() { return ( lastKeyCode ) ; }
 int repeated() { return ( keyRepeated ) ; }
@@ -1646,8 +1658,9 @@ void setKeyCode(struct input_event* evt) {
 	keyRepeated = 0;
 	break;
       case 2: /* repeat */
-	printKeyState(2);
-	keyRepeated = 1;
+	if (keyRepeated < 2)
+	  printKeyState(2);
+	keyRepeated = keyRepeated + 1;
 	break;
       default: /* 0 => keyUp */
 	printKeyState(0);
