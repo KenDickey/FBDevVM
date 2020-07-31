@@ -587,6 +587,16 @@ int i;
 }
 
 
-
+int keyCode2keyValue( int keyCode, int useCap ) {
+  if (!keyMapInitialized) initKeyMaps();
+  if ((0 <= keycode) && (keycode < KMAPSIZE)) {
+    if (useCap) {
+	return( shiftKey[ keyCode ] );
+    } else {
+	return( baseKey[ keyCode ] ) ;
+    }
+  }
+  return( 0 );
+}
 
 /*			--- E O F --- 			*/

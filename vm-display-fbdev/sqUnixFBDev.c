@@ -128,14 +128,16 @@ static struct kb *kb= 0;
 static struct fb *fb= 0;
 
 #include "sqUnixFBDevUtil.c"
+
 #ifdef SQUEAK_LIBEVDEV
-#include "sqUnixFBDevEVDEV.h"
-#include "sqUnixFBDevMouseEVDEV.c"
-#include "sqUnixFBDevKeyboardEVDEV.c"
+#include "sqUnixFBDevLibEVDEV.h"
+#include "sqUnixKeyMap.c"
+#include "sqUnixFBDevLibEVDEV.c"
 #else
 #include "sqUnixFBDevMouse.c"
 #include "sqUnixFBDevKeyboard.c"
 #endif
+
 #include "sqUnixFBDevFramebuffer.c"
 
 
@@ -362,9 +364,14 @@ static void display_printUsage(void)
   printf("\nFBDev <option>s:\n");
   printf("  -fbdev <dev>          use framebuffer device <dev> (default: /dev/fb0)\n");
   printf("  -kbmap <file>         load keymap from <file> (default: use kernel keymap)\n");
+#ifdef SQUEAK_LIBEVDEV
+  printf("  -kbdev <dev>          use keyboard device <dev> (default: /dev/input/event0)\n");
+  printf("  -msdev <dev>          use mouse    device <dev> (default: /dev/input/event1)\n");
+#else
   printf("  -kbdev <dev>          use keyboard device <dev> (default: /dev/psaux)\n");
   printf("  -msdev <dev>          use mouse device <dev> (default: /dev/psaux)\n");
   printf("  -msproto <protocol>   use the given <protocol> for the mouse (default: ps2)\n");
+#endif
   printf("  -vtlock               disallow all vt switching (for any reason)\n");
   printf("  -vtswitch             enable keyboard vt switching (Alt+FNx)\n");
 }
