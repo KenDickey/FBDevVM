@@ -3,7 +3,12 @@
  *  Copyright (c) 2009-2011 Red Hat, Inc
  */
 
-/* @@KenD@@ 2019 modified to test for input to Squeak VM mouse & keyboard */
+/*  2020 KenDickey modified to test for input to the
+ *    OpenSmalltalk VM mouse & keyboard.
+ *  This is test code and NOT part of the OpenSmalltalk VM.
+ *  Original code from 'evtest' under GPL 2
+ *  http://lists.freedesktop.org/mailman/listinfo/input-tools
+ */
 
 #define DEBUG 1
 #define DEBUG_EVENTS 1
