@@ -194,7 +194,7 @@ int i;
     baseKey[KEY_F7]      = XK_F7;
     shiftKey[KEY_F7]     = XK_F7;
     baseKey[KEY_F8]      = XK_F8;
-    shiftKey[KEY_F8]     = XK_F8
+    shiftKey[KEY_F8]     = XK_F8;
     baseKey[KEY_F9]      = XK_F9;
     shiftKey[KEY_F9]     = XK_F9;
     baseKey[KEY_F10]     = XK_F10;
@@ -315,9 +315,9 @@ int i;
     baseKey[KEY_POWER]  = 0x;
     shiftKey[KEY_POWER] = 0x;
 /*******************
-    baseKey[KEY_KPEQUAL]  = 0x3D; /* '=' */
+    baseKey[KEY_KPEQUAL]  = 0x3D; /* '=' *
     shiftKey[KEY_KPEQUAL] = 0x3D;
-*******************/
+*******************
     baseKey[KEY_KPPLUSMINUS]  = 0x;
     shiftKey[KEY_KPPLUSMINUS] = 0x;
     baseKey[KEY_PAUSE]  = 0x;
