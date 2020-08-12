@@ -45,8 +45,13 @@
  * e-mail - mail your message to <vojtech@ucw.cz>, or by paper mail:
  * Vojtech Pavlik, Simunkova 1594, Prague 8, 182 00 Czech Republic
  */
+/*
+ * Modified as testbed for OpenSmalltalk VM context 
+ *   by Ken Dickey, 2020
+ * Note: This file is GPL 2 and is NOT part of the VM.
+ */
 
-#define _GNU_SOURCE /* for MUSL */
+/*  define _GNU_SOURCE  for MUSL */
 #define LSB_FIRST 1
 
 #define FALSE 0

@@ -2,7 +2,7 @@
  * 
  * Author: Ian.Piumarta@INRIA.Fr
  * 
- * Last edited: 22 December 2019 by Ken.Dickey@whidbey.com
+ * Last edited: 2003-08-21 15:02:15 by piumarta on felina.inria.fr
  */
 
 
@@ -138,6 +138,7 @@ static ms_callback_t ms_setCallback(_self, ms_callback_t callback)
   return old;
 }
 
+
 static int ms_open(_self, char *msDev, char *msProto)
 {
   ms_init_t init= 0;
@@ -152,7 +153,6 @@ static int ms_open(_self, char *msDev, char *msProto)
       static struct _mstab {
   	  char *dev;		char *proto;
       } mice[]=	{
-	{ "/dev/input/event1",  "evdev" },
 	{ "/dev/psaux",		"ps2"	},
 	{ "/dev/input/mice",	"ps2"	},
 	{ "/dev/adbmouse",	"adb"	},
@@ -179,7 +179,6 @@ static int ms_open(_self, char *msDev, char *msProto)
       } protos[]= {
 	{ "ps2",	ms_ps2_init,	ms_ps2_handleEvents,	},
 	{ "adb",	ms_adb_init,	ms_adb_handleEvents,	},
-	{ "evdev",	ms_evdev_init,	ms_evd_handleEvents,	},		
 	{ 0, 0, 0 }
       };
       int i;

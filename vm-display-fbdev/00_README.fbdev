@@ -5,25 +5,6 @@ it might cause Squeak to crash, it might put your machine into a state
 where the keyboard and screen become *unusable*.
 
 
-0.1 UPDATE
-
-This is a work in progress to use libevdev rather than ps2 drivers to 
-allow the VM to run stand alone without a window system.
-
-You need some defines (e.g. setup for Alpine Linux; also 'export MUSL=1')
- export SQUEAK_VM=display-fbdev
- export SQUEAK_FBDEV=/dev/fb0
- export SQUEAK_KBDEV=/dev/input/event0
- export SQUEAK_MSDEV=/dev/input/event1
- export SQUEAK_LIBEVDEV=1
-
-Test system is currently a Raspberry Pi 3B running Alpine Linux.
-
-Cross your fingers, but don't hold your breath.
-
-Not yet ready to see light of day.  [PrePreAlpha Dev]
-
-
 1. INTRO
 
 This is a driver for Squeak running on the Linux framebuffer.
@@ -77,13 +58,14 @@ You MUST have WRITE PERMISSION for the following devices:
 	this is usually /dev/fb0
 
   - the mouse
-	this is either /dev/psaux (if you have a real PS/2 mouse) or
+	Yhis may be either /dev/psaux (if you have a real PS/2 mouse) or
 	/dev/input/mice (which emulates PS/2 when you have some other
-	kind of mouse)
+	kind of mouse).
+	If using libevdev (required -DUSEEVDEV) then /dev/input/event?
 
 In case of difficulty, the following might help:
 
-	chmod a+rw /dev/tty* /dev/fb* /dev/psaux /dev/input/mice
+	chmod a+rw /dev/tty* /dev/fb* /dev/psaux /dev/input/mice /dev/input/event*
 
 although this will somewhat compromise the security of your machine.
 
@@ -134,6 +116,6 @@ If this driver breaks your machine, you get to keep all the pieces.
 
 8. CONTACTS
 
-Please report bugs (and success stories) by email to: ian.piumarta@squeakland.org
+Please report bugs (and success stories) by email to: ken.dickey(at)whidbey.com
 
 Thanks!
