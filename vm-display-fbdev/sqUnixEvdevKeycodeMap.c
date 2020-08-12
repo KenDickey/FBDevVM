@@ -1,7 +1,6 @@
-/* sqUnixKeyMap.c -- maps key codes into events for the VM
- *                   in the absence of a window system
- *                   using libevdev
+/* sqUnixEvdevKeycodeMap.c 
  *
+ * Map (lib)evdev key codes into Squeak key codes
  * Author: Ken.Dickey@whidbey.com
  *
  * Copyright (C) 2019,2020 by Kenneth Alan Dickey
@@ -9,7 +8,7 @@
  * 
  * [Donated to the Squeak/Cuis/Pharo Community]
  *
- * This file is part of Unix Squeak.
+ * This file is part of the OpenSmalltalk / Unix Squeak VM.
  * 
  *   Permission is hereby granted, free of charge, to any person obtaining a
  *   copy of this software and associated documentation files (the "Software"),
@@ -37,8 +36,8 @@
  * on Raspberry Pi 3B running Alpine Linux.
  */
 
-#include <input.h>   /* /usr/include/linux/input.h */
-#include <keysym.h>  /* /usr/include/X11/keysym.h */
+#include <linux/input.h>   /* /usr/include/linux/input.h */
+#include <X11/keysym.h>  /* /usr/include/X11/keysym.h */
 
 static int keyMapInitialized = 0;
 #define KMAPSIZE 256
@@ -51,9 +50,9 @@ int i;
 	
   if (keyMapInitialized) return; /* do this once */
  
-  for (i = 0; i < KMAPSIZE; i++) ( 
-	baseKey[i]  = i;  /* default for debug @@?? use 0x00 ??@@ */
-	shiftKey[i] = i;
+  for (i = 0; i < KMAPSIZE; i++) {
+	baseKey[i]  = KEY_RESERVED;  /* default for debug @@??@@ */
+	shiftKey[i] = KEY_RESERVED;
   }
    /* Note: add 0x40 to keys less than 0x30 to get ctrl letter
     * e.g. FF = 0x0C; so 0x4C = L => '^L' (Ctrl-L) for Form Feed
@@ -314,10 +313,10 @@ int i;
     shiftKey[KEY_VOLUMEUP] = 0x;
     baseKey[KEY_POWER]  = 0x;
     shiftKey[KEY_POWER] = 0x;
-/*******************
-    baseKey[KEY_KPEQUAL]  = 0x3D; /* '=' *
+*******************/
+    baseKey[KEY_KPEQUAL]  = 0x3D;  /* '=' */
     shiftKey[KEY_KPEQUAL] = 0x3D;
-*******************
+/*******************
     baseKey[KEY_KPPLUSMINUS]  = 0x;
     shiftKey[KEY_KPPLUSMINUS] = 0x;
     baseKey[KEY_PAUSE]  = 0x;
@@ -589,14 +588,26 @@ int i;
 
 int keyCode2keyValue( int keyCode, int useCap ) {
   if (!keyMapInitialized) initKeyMaps();
-  if ((0 <= keycode) && (keycode < KMAPSIZE)) {
+  if ((0 <= keyCode) && (keyCode < KMAPSIZE)) {
     if (useCap) {
 	return( shiftKey[ keyCode ] );
     } else {
 	return( baseKey[ keyCode ] ) ;
     }
   }
-  return( 0 );
+  switch (keyCode) { /* KeyCodes above 256 */
+  case BTN_LEFT:
+    return(0); /* @@??@@ */
+    break;
+  case BTN_MIDDLE:
+    return(0); /* @@??@@ */
+    break;
+  case BTN_RIGHT:
+    return(0); /* @@??@@ */
+    break;
+  default:
+    return( 0 );
+  }
 }
 
 /*			--- E O F --- 			*/
