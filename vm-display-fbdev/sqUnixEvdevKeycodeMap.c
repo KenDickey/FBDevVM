@@ -597,13 +597,13 @@ int keyCode2keyValue( int keyCode, int useCap ) {
   }
   switch (keyCode) { /* KeyCodes above 256 */
   case BTN_LEFT:
-    return(0); /* @@??@@ */
+    return(BTN_LEFT); /* @@??@@ */
     break;
   case BTN_MIDDLE:
-    return(0); /* @@??@@ */
+    return(BTN_MIDDLE); /* @@??@@ */
     break;
   case BTN_RIGHT:
-    return(0); /* @@??@@ */
+    return(BTN_RIGHT); /* @@??@@ */
     break;
   default:
     return( 0 );

@@ -265,7 +265,7 @@ static void clearMouseButtons() { mouseButtonsDown = 0 ; wheelDelta = 0; }
 
 static void updateMouseButtons(struct input_event* evt) {
   if (evt->type == EV_KEY) {
-    if (evt->value == 1) { /* button down */
+    if ((evt->value == 1) || (evt->value == 2)) { /* button down|repeat */
       switch (evt->code) {
 	case BTN_LEFT:   mouseButtonsDown |= LeftMouseButtonBit;  break;
 	case BTN_MIDDLE: mouseButtonsDown |= MidMouseButtonBit;   break;
@@ -279,7 +279,6 @@ static void updateMouseButtons(struct input_event* evt) {
 	case BTN_RIGHT:  mouseButtonsDown &= ~RightMouseButtonBit; break;
 	default: break;
       }
-    /* ignore repeats (evt->value == 2) */
     }
   }
 }
@@ -448,7 +447,7 @@ static void updateModifierState(struct input_event* evt)
 /* left and right keys down and up must be tracked separately */
 {  /* harmless if not modifier key */
   if (evt->type == EV_KEY) {
-    if (evt->value == 1) { /* button down */
+    if ((evt->value == 1) || (evt->value == 2)) { /* button down|repeat */
 #ifdef DEBUG_EVENTS
       printEvtModifierKey(evt);
 #endif
@@ -479,7 +478,6 @@ static void updateModifierState(struct input_event* evt)
 	default: break;
         }
      }
-    /* ignore repeats (evt->value == 2) */
   } 
 }
 
@@ -583,7 +581,6 @@ void kb_close(struct kb *kbdSelf)
 struct kb *kb_new(void)
 {
   /*  struct kb *kbdSelf= (struct kb *)calloc(1, sizeof(struct kb)); */
-  struct kb *kbdSelf= &kbDev;
   kbDev.fd= -1;
   kbDev.dev = 0;
   return &kbDev;
@@ -626,11 +623,12 @@ static void processLibEvdevMouseEvents() {
       updateMouseButtons(&ev[i]); 
       setSqueakButtonState();
       setSqueakModifierState();
-      setKeyCode(&ev[i]);
+      /*      setKeyCode(&ev[i]); */
 #ifdef MOUSE_EVENTS
       printKeyState(value);
 #endif
-      enqueueMouseEvent( mouseButtonsDown, 0, 0 );
+      /* enqueueMouseEvent( mouseButtonsDown, 0, 0 ); */
+      recordMouseEvent();  /* should see mouse buttons.. */
     } else if ( (type == EV_SYN) | (type == EV_MSC) ) {
       return;
     } else {
