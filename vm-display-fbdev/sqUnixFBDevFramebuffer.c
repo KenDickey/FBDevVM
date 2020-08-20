@@ -84,6 +84,7 @@ struct fb
   unsigned long			  cursorBack[16][16];
 };
 
+static struct fb fbSelf;
 
 #define swab32(X)     ({ __u32 __x= (X);						\
                          ((__u32)((((__u32)(__x) & (__u32)0x000000ffUL) << 24)		\
@@ -112,19 +113,9 @@ static inline int fb_pitch(_self)	{ return self->pitch; }
 static inline int fb_height(_self)	{ return self->var.yres; }
 static inline int fb_depth(_self)	{ return self->var.bits_per_pixel; }
 
-static inline int fb_red_offset(_self)	{ return self->var.red.offset; }
-static inline int fb_green_offset(_self) { return self->var.green.offset; }
-static inline int fb_blue_offset(_self)	{ return self->var.blue.offset; }
-
 static inline unsigned long fb_pixel_position(_self, int x, int y) {
   return (x + self->var.xoffset) * (self->var.bits_per_pixel / 8)
       +  (y + self->var.yoffset) * self->fix.line_length ;
-}
-
-static inline unsigned long fb_pixel_color(_self, int red, int green, int blue) {
-  return (red   << fb_red_offset(self))
-       | (green << fb_green_offset(self))
-       | (blue  << fb_blue_offset(self)) ;
 }
 
 static inline unsigned long fb_getPixel_32(_self, int x, int y)
@@ -223,8 +214,8 @@ static void hideCursor(_self)
       int xo= self->cursorPosition.x + self->cursorOffset.x;
       int yo= self->cursorPosition.y + self->cursorOffset.y;
       int x, y;
-      for (y= 0;  y < 16;  ++y)
-	for (x= 0;  x < 16;  ++x)
+      for (y= 0;  y < 16; y++)
+	for (x= 0;  x < 16; x++)
 	  self->putPixel(self, xo + x, yo + y, self->cursorBack[y][x]);
       self->cursorVisible= 0;
     }
@@ -238,13 +229,14 @@ static void showCursor(_self)
       int xo= self->cursorPosition.x + self->cursorOffset.x;
       int yo= self->cursorPosition.y + self->cursorOffset.y;
       int y;
-      for (y= 0;  y < 16;  ++y)
+      for (y= 0; y < 16; y = y + 1)
 	{
 	  unsigned short bits= self->cursorBits[y];
 	  unsigned short mask= self->cursorMask[y];
 	  int x;
-	  for (x= 0;  x < 16;  ++x)
+	  for (x= 0; x < 16; x = x + 1)
 	    {
+	      /* Look at top bit, then shift & look at next bit.. */
 	      self->cursorBack[y][x]= self->getPixel(self, xo + x, yo + y);
 	      if      (bits & 0x8000) self->putPixel(self, xo + x, yo + y, self->blackPixel);
 	      else if (mask & 0x8000) self->putPixel(self, xo + x, yo + y, self->whitePixel);
@@ -285,10 +277,17 @@ static void fb_setCursor(_self, char *bits, char *mask, int xoff, int yoff)
   hideCursor(self);
   self->cursorOffset.x= xoff;
   self->cursorOffset.y= yoff;
-  for (y= 0;  y < 16;  ++y)
+  for (y= 0;  y < 16; y = y+1)
     {
-      self->cursorBits[y]= (((unsigned long *)bits)[y]) >> 16;
-      self->cursorMask[y]= (((unsigned long *)mask)[y]) >> 16;
+      /* Pick off top 16 bits of 32 bit elements; lower 16 unused */
+      /* @@FIXME: bits & mask were (unsigned long *) -- bas for 64 bits
+         need to spec portably !! @@ */
+      self->cursorBits[y]= (((unsigned int *)bits)[y]) >> 16;
+      if (mask) {
+        self->cursorMask[y]= (((unsigned int *)mask)[y]) >> 16;
+      } else {  /* unmasked cursor */
+        self->cursorMask[y]= self->cursorBits[y]; /* Black Bits matter */
+      }
     }
   showCursor(self);
 }
@@ -634,8 +633,6 @@ static void showBalloonAt(_self, int left, int top)
       /* extract RGB values from Balloon data */
       BALLOON_PIXEL( data, pixel );
       /* above side effect: data += balloon_bytes_per_pixel */
-      /*      myPixel = fb_pixel_color(self, pixel[0], pixel[1], pixel[2]);
-	      self->putPixel(self, left + x, top + y, myPixel); */
       self->drawPixel(self, left + x, top + y, pixel[0], pixel[1], pixel[2]);
     }
   }
@@ -749,10 +746,10 @@ static void fb_close(_self)
 
 static struct fb *fb_new(void)
 {
-  _self= (struct fb *)calloc(1, sizeof(struct fb));
-  if (!self) outOfMemory();
-  self->fd=  -1;
-  return self;
+  /*  _self= (struct fb *)calloc(1, sizeof(struct fb)); */
+
+  fbSelf.fd=  -1;
+  return &fbSelf;
 }
 
 
@@ -760,7 +757,7 @@ static void fb_delete(_self)
 {
   assert(self->addr ==  0);
   assert(self->fd   == -1);
-  free(self);
+/*  free(self);*/
 }
 
 
