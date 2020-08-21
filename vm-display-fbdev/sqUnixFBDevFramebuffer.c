@@ -41,6 +41,14 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
+/* be less dependent on architecture defs */
+#include <sys/types.h>
+#define uint8   u_int8_t
+#define uint16  u_int16_t
+#define uint32  u_int32_t
+/* Pixels are kept as 32 bits: uint32 */
+#define pixel_t u_int32_t
+
 #include <linux/fb.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
@@ -54,10 +62,11 @@
 
 struct fb;
 
+
 typedef void		(*fb_copyBits_t )(_self, char *bits, int l, int r, int t, int b);
 typedef void		(*fb_drawPixel_t)(_self, int x, int y, int r, int g, int b);
-typedef unsigned long	(*fb_getPixel_t )(_self, int x, int y);
-typedef void		(*fb_putPixel_t )(_self, int x, int y, unsigned long pixel);
+typedef pixel_t		(*fb_getPixel_t )(_self, int x, int y);
+typedef void		(*fb_putPixel_t )(_self, int x, int y, pixel_t pixel);
 
 struct fb
 {
@@ -74,14 +83,14 @@ struct fb
   fb_drawPixel_t		  drawPixel;
   fb_getPixel_t			  getPixel;
   fb_putPixel_t			  putPixel;
-  unsigned long			  whitePixel;
-  unsigned long			  blackPixel;
+  pixel_t			  whitePixel;
+  pixel_t			  blackPixel;
   SqPoint			  cursorPosition;
   SqPoint			  cursorOffset;
   int				  cursorVisible;
-  unsigned short		  cursorBits[16];
-  unsigned short		  cursorMask[16];
-  unsigned long			  cursorBack[16][16];
+  uint16			  cursorBits[16]; 
+  uint16			  cursorMask[16];
+  pixel_t			  cursorBack[16][16];
 };
 
 static struct fb fbSelf;
@@ -118,59 +127,59 @@ static inline unsigned long fb_pixel_position(_self, int x, int y) {
       +  (y + self->var.yoffset) * self->fix.line_length ;
 }
 
-static inline unsigned long fb_getPixel_32(_self, int x, int y)
+static inline pixel_t fb_getPixel_32(_self, int x, int y)
 {
   return ((x >= 0) && (y >= 0) && (x < fb_width(self)) && (y < fb_height(self)))
-    ? *((unsigned long *)(self->addr
-			   + (x + self->var.xoffset) * (32 / 8)
-			   + (y + self->var.yoffset) * (self->fix.line_length)))
+    ? *((pixel_t *)(self->addr
+		   + (x + self->var.xoffset) * (32 / 8)
+		   + (y + self->var.yoffset) * (self->fix.line_length)))
     : 0;
 }
 
-static inline void fb_putPixel_32(_self, int x, int y, unsigned long pix)
+static inline void fb_putPixel_32(_self, int x, int y, pixel_t pix)
 {
   if ((x >= 0) && (y >= 0) && (x < fb_width(self)) && (y < fb_height(self)))
     {
-      *((unsigned long *)(self->addr
-			  + (x + self->var.xoffset) * (32 / 8)
-			  + (y + self->var.yoffset) * (self->fix.line_length)))
+      *((pixel_t *)(self->addr
+		  + (x + self->var.xoffset) * (32 / 8)
+		  + (y + self->var.yoffset) * (self->fix.line_length)))
 	= pix;
     }
 }
 
 
-static inline unsigned long fb_getPixel_16(_self, int x, int y)
+static inline pixel_t fb_getPixel_16(_self, int x, int y)
 {
   return ((x >= 0) && (y >= 0) && (x < fb_width(self)) && (y < fb_height(self)))
-    ? *((unsigned short *)(self->addr
-			   + (x + self->var.xoffset) * (16 / 8)
-			   + (y + self->var.yoffset) * (self->fix.line_length)))
+    ? *((uint16 *)(self->addr
+		   + (x + self->var.xoffset) * (16 / 8)
+		   + (y + self->var.yoffset) * (self->fix.line_length)))
     : 0;
 }
 
-static inline void fb_putPixel_16(_self, int x, int y, unsigned long pix)
+static inline void fb_putPixel_16(_self, int x, int y, pixel_t pix)
 {
   if ((x >= 0) && (y >= 0) && (x < fb_width(self)) && (y < fb_height(self)))
     {
-      *((unsigned short *)(self->addr
-			   + (x + self->var.xoffset) * (16 / 8)
-			   + (y + self->var.yoffset) * (self->fix.line_length)))
+      *((uint16 *)(self->addr
+		   + (x + self->var.xoffset) * (16 / 8) 
+		   + (y + self->var.yoffset) * (self->fix.line_length)))
 	= pix;
     }
 }
 
 
-static inline unsigned long fb_getPixel_8(_self, int x, int y)
+static inline pixel_t fb_getPixel_8(_self, int x, int y)
 {
   return ((x >= 0) && (y >= 0) && (x < fb_width(self)) && (y < fb_height(self)))
-    ? *((unsigned char *)(self->addr
+    ? *((uint16 *)(self->addr
 			  + (x + self->var.xoffset)
 			  + (y + self->var.yoffset) * (self->fix.line_length)))
     : 0;
 }
 
 
-static inline void fb_putPixel_8(_self, int x, int y, unsigned long pix)
+static inline void fb_putPixel_8(_self, int x, int y, pixel_t pix)
 {
   if ((x >= 0) && (y >= 0) && (x < fb_width(self)) && (y < fb_height(self)))
     {
@@ -229,12 +238,12 @@ static void showCursor(_self)
       int xo= self->cursorPosition.x + self->cursorOffset.x;
       int yo= self->cursorPosition.y + self->cursorOffset.y;
       int y;
-      for (y= 0; y < 16; y = y + 1)
+      for (y= 0; y < 16; y += 1)
 	{
 	  unsigned short bits= self->cursorBits[y];
 	  unsigned short mask= self->cursorMask[y];
 	  int x;
-	  for (x= 0; x < 16; x = x + 1)
+	  for (x= 0; x < 16; x += 1)
 	    {
 	      /* Look at top bit, then shift & look at next bit.. */
 	      self->cursorBack[y][x]= self->getPixel(self, xo + x, yo + y);
@@ -280,11 +289,9 @@ static void fb_setCursor(_self, char *bits, char *mask, int xoff, int yoff)
   for (y= 0;  y < 16; y = y+1)
     {
       /* Pick off top 16 bits of 32 bit elements; lower 16 unused */
-      /* @@FIXME: bits & mask were (unsigned long *) -- bas for 64 bits
-         need to spec portably !! @@ */
-      self->cursorBits[y]= (((unsigned int *)bits)[y]) >> 16;
+      self->cursorBits[y]=   (((pixel_t *)bits)[y]) >> 16;
       if (mask) {
-        self->cursorMask[y]= (((unsigned int *)mask)[y]) >> 16;
+        self->cursorMask[y]= (((pixel_t *)mask)[y]) >> 16;
       } else {  /* unmasked cursor */
         self->cursorMask[y]= self->cursorBits[y]; /* Black Bits matter */
       }
@@ -296,26 +303,27 @@ static void fb_setCursor(_self, char *bits, char *mask, int xoff, int yoff)
 static void fb_advanceCursor(_self, int dx, int dy)
 {
   hideCursor(self);
-  self->cursorPosition.x= max(0, min(self->cursorPosition.x + dx, fb_width(self) - 1));
+  self->cursorPosition.x= max(0, min(self->cursorPosition.x + dx, fb_width(self)  - 1));
   self->cursorPosition.y= max(0, min(self->cursorPosition.y + dy, fb_height(self) - 1));
   showCursor(self);
 }
 
 
-static void fb_copyBits_32(_self, char *bits, int l, int r, int t, int b)
+static void fb_copyBits_32(_self, char *bits, int left, int right, int top, int bottom)
 {
   int x, y;
-  hideCursorIn(self, l, r, t, b);
-  for (y= t;  y < b;  ++y)
+  hideCursorIn(self, left, right, top, bottom);
+  for (y= top;  y < bottom;  y += 1)
     {
-      unsigned long *in= (unsigned long *)(bits + ((l + (y * fb_width(self))) * 4));
-      unsigned long *out= (unsigned long *)(self->addr + ((l + (y * fb_pitch(self))) * 4));
-      for (x= l;  x < r;  x += 1, in += 1, out += 1)
+      pixel_t *in=  (pixel_t *)(bits + ((left + (y * fb_width(self))) * 4));
+      pixel_t *out= (pixel_t *)(self->addr + fb_pixel_position(self, left, y));
+ 			     /*(self->addr + ((left + (y * fb_pitch(self))) * 4));*/
+      for (x= left;  x < right;  x += 1, in += 1, out += 1)
 	{
 	  out[0]= in[0];
 	}
     }
-  showCursorIn(self, l, r, t, b);
+  showCursorIn(self, left, right, top, bottom);
 }
 
 
@@ -327,17 +335,17 @@ static inline unsigned short fb_repack565(unsigned short pixel)
 }
 
 
-static void fb_copyBits_16(_self, char *bits, int l, int r, int t, int b)
+static void fb_copyBits_16(_self, char *bits, int left, int right, int top, int bottom)
 {
   int x, y;
-  l &= 0xfffe;
-  hideCursorIn(self, l, r, t, b);
-  for (y= t;  y < b;  ++y)
+  left &= 0xfffe;
+  hideCursorIn(self, left, right, top, bottom);
+  for (y= top; y < bottom; y += 1)
     {
-      unsigned short *in=  (unsigned short *)(bits + ((l + (y * fb_width(self))) * 2));
-      /*  unsigned short *out= (unsigned short *)(self->addr + ((l + (y * fb_pitch(self))) * 2)); */
-      unsigned short *out= (unsigned short *)(self->addr + fb_pixel_position(self, l, y));
-      for (x= l;  x < r;  x += 2, in += 2, out += 2)
+      uint16 *in=  (uint16 *)(bits + ((left + (y * fb_width(self))) * 2));
+      /*  unsigned short *out= (unsigned short *)(self->addr + ((left + (y * fb_pitch(self))) * 2)); */
+      uint16 *out= (uint16 *)(self->addr + fb_pixel_position(self, left, y));
+      for (x= left;  x < right;  x += 2, in += 2, out += 2)
 	{
 #	 if defined(WORDS_BIGENDIAN)
 	  out[0]= fb_repack565(in[0]);
@@ -348,7 +356,7 @@ static void fb_copyBits_16(_self, char *bits, int l, int r, int t, int b)
 #	 endif
 	}
     }
-  showCursorIn(self, l, r, t, b);
+  showCursorIn(self, left, right, top, bottom);
 }
 
 static void fb_copyBits_15(_self, char *bits, int l, int r, int t, int b)
@@ -363,7 +371,7 @@ static void fb_copyBits_15(_self, char *bits, int l, int r, int t, int b)
       for (x= l;  x < r;  x += 2, in += 2, out += 2)
 	{
 #	 if defined(WORDS_BIGENDIAN)
-	  *(unsigned long *)out= *(unsigned long *)in;
+	  *(pixel_t *)out= *(pixel_t *)in;
 #	 else
 	  out[0]= in[1];
 	  out[1]= in[0];
@@ -380,15 +388,15 @@ static void fb_copyBits_8(_self, char *bits, int l, int r, int t, int b)
   hideCursorIn(self, l, r, t, b);
   for (y= t;  y < b;  ++y)
     {
-      unsigned char *in= (unsigned char *)(bits + ((l + (y * fb_pitch(self)))));
+      unsigned char *in=  (unsigned char *)(bits + ((l + (y * fb_pitch(self)))));
       unsigned char *out= (unsigned char *)(self->addr + ((l + (y * fb_pitch(self)))));
       for (x= l;  x < r;  x += 4, in += 4, out += 4)
 	{
-	  unsigned long pix= *(unsigned long *)out= *(unsigned long *)in;
+	  pixel_t pix= *(pixel_t *)out= *(pixel_t *)in;
 #        if !defined(WORDS_BIGENDIAN)
 	  pix= swab32(pix);
 #        endif
-	  *(unsigned long *)out= pix;
+	  *(pixel_t *)out= pix;
 	}
     }
   showCursorIn(self, l, r, t, b);
@@ -622,7 +630,7 @@ static void showBalloonAt(_self, int left, int top)
 {
   int x, y;
   char *data = balloon_data, pixel[4];
-  unsigned long myPixel;
+  pixel_t myPixel;
   int balloon_bytes_per_pixel = 4; /* 32 bits */
 
   /* Center Balloon on x,y point */
@@ -663,8 +671,8 @@ static void fb_initGraphics(_self)
   int x, y;
   assert(self->kb);
   kb_initGraphics(self->kb);
-  for (y= 0;  y < fb_height(self);  ++y)
-    for (x= 0;  x < fb_width(self);  ++x)
+  for (y= 0;  y < fb_height(self); y += 1)
+    for (x= 0;  x < fb_width(self); x += 1)
       self->putPixel(self, x, y, self->whitePixel);
   /* add eye candy */
   x = fb_width(self)  / 2;
