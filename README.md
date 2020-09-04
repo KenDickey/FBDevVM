@@ -15,7 +15,7 @@ Full code now in the OpenSmalltalk repository:
 See notes in:
   build.linux64ARMv8/HowToBuild -- MUSL at end
   platforms/unix/vm-display-fbdev/AlpineLinux-Notes.txt
-  platforms/unix/vm-display-fbdev/Armian-Notes.txt
+  platforms/unix/vm-display-fbdev/Armbian-Notes.txt
 
 Note:
   MUSL requires flags "-DMUSL -D_GNU_SOURCE" ..
